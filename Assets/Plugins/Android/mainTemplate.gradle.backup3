@@ -56,7 +56,7 @@ android {
     }**PACKAGING**
     
     // AÑADIR packaging options para excluir
-    packaging {
+    packagingOptions {
         exclude '**/support-v4-*.aar'
         exclude '**/android-support-*.aar'
     }

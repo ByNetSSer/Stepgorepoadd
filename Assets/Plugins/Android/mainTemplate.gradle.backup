@@ -2,6 +2,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.4.0'
@@ -9,7 +10,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply from: '../shared/keepUnitySymbols.gradle'
+
 **APPLY_PLUGINS**
 
 dependencies {
@@ -22,11 +23,8 @@ android {
     ndkPath "**NDKPATH**"
     ndkVersion "**NDKVERSION**"
 
-    // USAR 33 que es más estable
     compileSdk 33
-    buildToolsVersion = "**BUILDTOOLS**"
-
-    // ELIMINAR completamente compileSdkExtension
+    buildToolsVersion "34.0.0"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -46,7 +44,7 @@ android {
 **DEFAULT_CONFIG_SETUP**
     }
 
-    lintOptions {
+    lint {
         checkReleaseBuilds false
         abortOnError false
     }

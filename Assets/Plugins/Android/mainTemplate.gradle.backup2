@@ -10,7 +10,6 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply from: '../shared/keepUnitySymbols.gradle'
 
 **APPLY_PLUGINS**
 
@@ -56,7 +55,7 @@ android {
     }**PACKAGING**
     
     // AÑADIR packaging options para excluir
-    packaging {
+    packagingOptions {
         exclude '**/support-v4-*.aar'
         exclude '**/android-support-*.aar'
     }
