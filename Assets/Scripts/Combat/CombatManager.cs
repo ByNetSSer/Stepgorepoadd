@@ -13,7 +13,7 @@ public class CombatManager : MonoBehaviour
     private bool isFighting = false;
 
     private ArrowType currentArrow;
-
+    public CombatUI ui;
     [Header("Configuración")]
     public float wrongPenalty = 1.2f; // tiempo restado al fallar
 
@@ -28,7 +28,7 @@ public class CombatManager : MonoBehaviour
         currentMonster = monstersList[Random.Range(0, monstersList.Length)];
         currentHealth = currentMonster.maxHealth;
         currentTime = currentMonster.timeLimit;
-
+        ui.SetMonsterData(currentMonster);
         GenerateNewArrow();
 
         isFighting = true;
@@ -54,12 +54,12 @@ public class CombatManager : MonoBehaviour
     public void CorrectInput()
     {
         if (!isFighting) return;
-
+       
         int damage = player.GetDamage() - currentMonster.resistance;
         if (damage < 1) damage = 1;
 
         currentHealth -= damage;
-
+        ui.UpdateHealth(currentHealth);
         Debug.Log("? Correcto! Vida restante: " + currentHealth);
 
         if (currentHealth <= 0)
@@ -78,7 +78,7 @@ public class CombatManager : MonoBehaviour
     public void WrongInput()
     {
         if (!isFighting) return;
-
+        ui.UpdateTime(currentTime);
         currentTime -= wrongPenalty;
 
         Debug.Log("? Fallo! Tiempo restante: " + currentTime);
@@ -105,7 +105,7 @@ public class CombatManager : MonoBehaviour
     // =====================================================
     // FINAL DEL COMBATE
     // =====================================================
-    private void EndCombat(bool win)
+    public void EndCombat(bool win)
     {
         isFighting = false;
 
@@ -128,7 +128,7 @@ public class CombatManager : MonoBehaviour
         if (!isFighting) return;
 
         currentTime -= Time.deltaTime;
-
+        ui.UpdateTime(currentTime);
         if (Input.GetKeyDown(KeyCode.UpArrow)) TryInput(ArrowType.Up);
         if (Input.GetKeyDown(KeyCode.DownArrow)) TryInput(ArrowType.Down);
         if (Input.GetKeyDown(KeyCode.LeftArrow)) TryInput(ArrowType.Left);
@@ -139,6 +139,10 @@ public class CombatManager : MonoBehaviour
             Debug.Log("? El monstruo escapó");
             EndCombat(false);
         }
+    }
+    public bool IsFighting()
+    {
+        return isFighting;
     }
 }
 

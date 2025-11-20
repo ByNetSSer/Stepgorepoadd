@@ -50,4 +50,8 @@ public class SceneButton : MonoBehaviour
         // 2?? Luego oculta la escena actual
         currentScene.Hide(useInstantSwap);
     }
+    public void OnClick()
+    {
+        OnPressed();
+    }
 }

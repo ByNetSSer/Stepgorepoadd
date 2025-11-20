@@ -87,6 +87,7 @@ public class StepCounter : MonoBehaviour
 
                 UpdateStepsUI();
                 SavePersistentData();
+                OnStepsUpdated?.Invoke(totalSteps);
             }
 
             lastRecordedPosition = currentLocation;
