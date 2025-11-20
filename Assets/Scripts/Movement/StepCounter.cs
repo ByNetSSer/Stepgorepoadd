@@ -24,6 +24,9 @@ public class StepCounter : MonoBehaviour
     private const string STEPS_KEY = "TotalSteps";
     private const string POSITION_KEY = "LastPosition";
     private const string TIME_KEY = "LastSaveTime";
+    // Añadir esta línea en la clase StepCounter existente:
+    public System.Action<int> OnStepsUpdated;
+
 
     void Awake()
     {
@@ -84,8 +87,6 @@ public class StepCounter : MonoBehaviour
 
                 UpdateStepsUI();
                 SavePersistentData();
-
-                Debug.Log($"?? {newSteps} pasos detectados. Total: {totalSteps}");
             }
 
             lastRecordedPosition = currentLocation;
@@ -111,7 +112,7 @@ public class StepCounter : MonoBehaviour
     {
         if (stepsText != null)
         {
-            stepsText.text = $"{totalSteps} pasos";
+            stepsText.text = $"{totalSteps}";
         }
     }
 

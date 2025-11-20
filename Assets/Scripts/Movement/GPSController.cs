@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.Android;
 using System.Collections;
 
@@ -13,8 +13,8 @@ public class GPSController : MonoBehaviour
     public System.Action<Vector2> OnLocationChanged;
 
     private Vector2 lastLocation;
-    [Header("Step Counter Integration")]
-    public float minimumDistanceForStep = 2f;
+    private double lastTimestamp = -1;
+
     void Awake()
     {
         if (Instance == null)
@@ -22,10 +22,7 @@ public class GPSController : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+        else Destroy(gameObject);
     }
 
     void Start()
@@ -37,124 +34,101 @@ public class GPSController : MonoBehaviour
     {
         Debug.Log("=== INICIANDO GPS ===");
 
-        // Solicitar permisos en Android
 #if UNITY_ANDROID
         if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
         {
-            Debug.Log("Solicitando permiso de ubicaciÛn...");
             Permission.RequestUserPermission(Permission.FineLocation);
             yield return new WaitForSeconds(3);
         }
-
-        // Verificar si el usuario concediÛ permisos
-        if (!Input.location.isEnabledByUser)
-        {
-            Debug.LogError("GPS no habilitado por el usuario");
-
-            // Mostrar di·logo nativo para activar GPS
-            ShowEnableGPSDialog();
-            yield return new WaitForSeconds(5);
-
-            // Verificar nuevamente despuÈs del di·logo
-            if (!Input.location.isEnabledByUser)
-            {
-                Debug.LogError("Usuario no activÛ el GPS");
-                yield break;
-            }
-        }
 #endif
 
-        // Iniciar servicio de ubicaciÛn
-        Debug.Log("Iniciando servicio de ubicaciÛn...");
-        Input.location.Start(1f, 1f); // Alta precisiÛn
+        // ALTA PRECISI√ìN REAL
+        Input.location.Start(5f, 0.1f);
 
         int maxWait = 20;
         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
         {
+            Debug.Log($"‚è≥ Esperando GPS... {maxWait}s");
             yield return new WaitForSeconds(1);
             maxWait--;
-            Debug.Log($"Esperando GPS... {maxWait}s");
         }
 
         if (Input.location.status == LocationServiceStatus.Failed)
         {
-            Debug.LogError("Error al inicializar GPS");
+            Debug.LogError("‚ùå Error al iniciar GPS");
             yield break;
         }
-        else
-        {
-            gpsInitialized = true;
-            lastLocation = GetCurrentLocation();
-            Debug.Log($"? GPS INICIALIZADO: {lastLocation}");
 
-            // Notificar primera ubicaciÛn
-            OnLocationChanged?.Invoke(lastLocation);
+        gpsInitialized = true;
+        lastLocation = GetCurrentLocation();
+        lastTimestamp = Input.location.lastData.timestamp;
 
-            // Iniciar actualizaciones continuas
-            StartCoroutine(UpdateLocationCoroutine());
-        }
+        Debug.Log($"üìç GPS READY: {lastLocation}");
+
+        OnLocationChanged?.Invoke(lastLocation);
+
+        StartCoroutine(GPSUpdateLoop());
     }
 
-    IEnumerator UpdateLocationCoroutine()
+    IEnumerator GPSUpdateLoop()
     {
         while (true)
         {
-            yield return new WaitForSeconds(1f);
-
-            if (gpsInitialized && Input.location.status == LocationServiceStatus.Running)
+            if (!gpsInitialized)
             {
-                Vector2 currentLocation = GetCurrentLocation();
-                float distance = Vector2.Distance(currentLocation, lastLocation);
-
-                // ? Usar distancia mayor para evitar micro-actualizaciones
-                if (distance > 0.00001f) // Aproximadamente 1 metro
-                {
-                    lastLocation = currentLocation;
-                    Debug.Log($"?? Nueva ubicaciÛn: {currentLocation} | Distancia: {distance:F6}");
-                    OnLocationChanged?.Invoke(currentLocation);
-                }
+                yield return new WaitForSeconds(1);
+                continue;
             }
+
+            if (Input.location.status != LocationServiceStatus.Running)
+            {
+                Debug.LogWarning("‚ö† GPS dej√≥ de correr, reiniciando...");
+
+                Input.location.Stop();
+                Input.location.Start(5f, 0.1f);
+                yield return new WaitForSeconds(2);
+                continue;
+            }
+
+            LocationInfo data = Input.location.lastData;
+
+            // SI EL TIMESTAMP CAMBI√ì ‚Üí NUEVO DATO REAL
+            if (data.timestamp != lastTimestamp)
+            {
+                lastTimestamp = data.timestamp;
+
+                Vector2 newPos = new Vector2(data.latitude, data.longitude);
+
+                lastLocation = newPos;
+                OnLocationChanged?.Invoke(newPos);
+
+                Debug.Log($"üì° GPS actualizado: {newPos}");
+            }
+            else
+            {
+                Debug.Log("‚è≥ GPS no da datos nuevos, reseteando...");
+                Input.location.Stop();
+                Input.location.Start(5f, 0.1f);
+            }
+
+            yield return new WaitForSeconds(1f);
         }
     }
+
     public Vector2 GetCurrentLocation()
     {
-        if (gpsInitialized && Input.location.status == LocationServiceStatus.Running)
+        if (Input.location.status == LocationServiceStatus.Running)
         {
             latitude = Input.location.lastData.latitude;
             longitude = Input.location.lastData.longitude;
             return new Vector2(latitude, longitude);
         }
-        return Vector2.zero;
+
+        return lastLocation;
     }
 
     public bool IsGPSReady()
     {
         return gpsInitialized && Input.location.status == LocationServiceStatus.Running;
-    }
-
-#if UNITY_ANDROID
-    private void ShowEnableGPSDialog()
-    {
-        try
-        {
-            AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-
-            AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.settings.LOCATION_SOURCE_SETTINGS");
-            currentActivity.Call("startActivity", intent);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("Error al abrir configuraciones: " + e.Message);
-        }
-    }
-#endif
-
-    void OnDestroy()
-    {
-        if (Input.location.isEnabledByUser)
-        {
-            Input.location.Stop();
-        }
     }
 }
