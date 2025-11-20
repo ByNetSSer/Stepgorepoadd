@@ -75,6 +75,7 @@ public class Mission
         {
             isClaimed = true;
             Debug.Log($"Recompensa reclamada: {rewardDescription}");
+
         }
     }
 }

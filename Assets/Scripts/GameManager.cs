@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+   
+
     public GameplayUIController gameplayUIController;
     public CombatController combatController;  // Referencia al CombatController en la misma escena
 
