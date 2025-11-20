@@ -481,6 +481,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3338928461268144957}
+  - component: {fileID: 9069491098417951262}
   - component: {fileID: 1335915310651625954}
   m_Layer: 5
   m_Name: PrefabMission Long
@@ -512,6 +513,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 128.5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &9069491098417951262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654280059824852593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ab4dc880e5373419c97f4b64780a4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleText: {fileID: 1972931620532753888}
+  descriptionText: {fileID: 810312759496962706}
+  progressText: {fileID: 5366543060020992880}
+  progressSlider: {fileID: 5658191715982922636}
+  claimButton: {fileID: 6480041482241052140}
+  rewardText: {fileID: 536870096668056458}
+  timeRemainingText: {fileID: 5759910384847473279}
 --- !u!114 &1335915310651625954
 MonoBehaviour:
   m_ObjectHideFlags: 0

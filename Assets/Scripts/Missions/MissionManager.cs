@@ -99,7 +99,7 @@ public class MissionManager : MonoBehaviour
             "long_2",
             "Caminante Experto",
             "Camina 10000 pasos en 3 días",
-            10000,
+            6000,
             "Recompensa de Experto",
             MissionType.Long
         ));
@@ -109,7 +109,7 @@ public class MissionManager : MonoBehaviour
             "weekly_1",
             "Maratoniano Semanal",
             "Camina 25000 pasos esta semana",
-            25000,
+            15000,
             "Recompensa Semanal Especial",
             MissionType.Weekly
         ));
@@ -118,7 +118,7 @@ public class MissionManager : MonoBehaviour
             "weekly_2",
             "Aventurero Semanal",
             "Camina 15000 pasos esta semana",
-            15000,
+            10000,
             "Recompensa Semanal",
             MissionType.Weekly
         ));

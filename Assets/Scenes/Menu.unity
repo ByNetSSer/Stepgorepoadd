@@ -2788,7 +2788,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   missionsContainer: {fileID: 738039680}
-  missionUIPrefab: {fileID: 1654280059824852593, guid: 9d8888a1c04caed4083ffc449eeaefbe, type: 3}
+  missionUIPrefab: {fileID: 1654280059824852593, guid: c7e1a0677c8066d4c976e2ca21640cba, type: 3}
   windowTitle: {fileID: 1544177606}
   windowType: 2
   missionUIList: []
@@ -3624,7 +3624,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &933608250
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3660,8 +3660,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxDailyResets: 3
-  baseDailySteps: 1000
-  dailyStepIncrement: 500
+  baseDailySteps: 200
+  dailyStepIncrement: 50
   dailyMissionsWindow: {fileID: 1849207151}
   longMissionsWindow: {fileID: 2137152680}
   weeklyMissionsWindow: {fileID: 738039681}
@@ -8884,7 +8884,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   missionsContainer: {fileID: 2137152679}
-  missionUIPrefab: {fileID: 1654280059824852593, guid: 2af4ecb8811e08e41b4564e13f06e4cf, type: 3}
+  missionUIPrefab: {fileID: 1654280059824852593, guid: adfee18cb58a5e94098be2f6805bdd3b, type: 3}
   windowTitle: {fileID: 1420480291}
   windowType: 1
   missionUIList: []
