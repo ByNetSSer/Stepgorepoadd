@@ -14,7 +14,20 @@ public class CombatUI : MonoBehaviour
     public Slider timeSlider;
     public TextMeshProUGUI timeText;
 
-    // Llamado desde el CombatManager
+    [Header("Flecha Única")]
+    public Image arrowImage;
+
+    [Header("Sprites de Flechas")]
+    public Sprite spriteUp;
+    public Sprite spriteDown;
+    public Sprite spriteLeft;
+    public Sprite spriteRight;
+
+
+
+    // -----------------------------------------------------------
+    // DATOS DEL MONSTRUO
+    // -----------------------------------------------------------
     public void SetMonsterData(MonsterSO monster)
     {
         monsterNameText.text = monster.monsterName;
@@ -26,22 +39,51 @@ public class CombatUI : MonoBehaviour
         timeSlider.maxValue = monster.timeLimit;
         timeSlider.value = monster.timeLimit;
 
-        // Textos iniciales
         healthText.text = monster.maxHealth.ToString();
         timeText.text = monster.timeLimit.ToString("0.0") + "s";
     }
 
-    // Actualizar vida visual
+    // -----------------------------------------------------------
+    // ACTUALIZAR VIDA
+    // -----------------------------------------------------------
     public void UpdateHealth(int currentHealth)
     {
         healthSlider.value = currentHealth;
         healthText.text = currentHealth.ToString();
     }
 
-    // Actualizar tiempo visual
+    // -----------------------------------------------------------
+    // ACTUALIZAR TIEMPO
+    // -----------------------------------------------------------
     public void UpdateTime(float currentTime)
     {
         timeSlider.value = currentTime;
         timeText.text = currentTime.ToString("0.0") + "s";
+    }
+
+
+    // -----------------------------------------------------------
+    // MOSTRAR FLECHA ÚNICA
+    // -----------------------------------------------------------
+    public void ShowArrow(ArrowType type)
+    {
+        switch (type)
+        {
+            case ArrowType.Up:
+                arrowImage.sprite = spriteUp;
+                break;
+
+            case ArrowType.Down:
+                arrowImage.sprite = spriteDown;
+                break;
+
+            case ArrowType.Left:
+                arrowImage.sprite = spriteLeft;
+                break;
+
+            case ArrowType.Right:
+                arrowImage.sprite = spriteRight;
+                break;
+        }
     }
 }

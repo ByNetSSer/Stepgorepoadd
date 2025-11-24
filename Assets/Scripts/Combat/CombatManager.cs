@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CombatManager : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class CombatManager : MonoBehaviour
 
     private ArrowType currentArrow;
     public CombatUI ui;
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     public float wrongPenalty = 1.2f; // tiempo restado al fallar
 
 
@@ -46,7 +46,10 @@ public class CombatManager : MonoBehaviour
         currentArrow = (ArrowType)r;
 
         Debug.Log("Nueva flecha generada: " + currentArrow);
+
+        ui.ShowArrow(currentArrow); // ⬅ flecha única en UI
     }
+
 
     // =====================================================
     // INPUT CORRECTO
@@ -118,7 +121,7 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("?? El monstruo escap�.");
+            Debug.Log("?? El monstruo escapó.");
         }
     }
 
@@ -136,7 +139,7 @@ public class CombatManager : MonoBehaviour
 
         if (currentTime <= 0)
         {
-            Debug.Log("? El monstruo escap�");
+            Debug.Log("? El monstruo escapó");
             EndCombat(false);
         }
     }
