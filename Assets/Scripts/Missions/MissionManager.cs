@@ -1,7 +1,8 @@
-using UnityEngine;
+ï»¿using System;
 using System.Collections.Generic;
-using System;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.Events;
 
 public class MissionManager : MonoBehaviour
 {
@@ -19,8 +20,7 @@ public class MissionManager : MonoBehaviour
 
     private List<Mission> allMissions = new List<Mission>();
     private DateTime lastResetTime;
-
-    // Claves para PlayerPrefs
+    public UnityEvent Oncompletemission;
     private const string MISSIONS_KEY = "MissionsData";
     private const string LAST_RESET_KEY = "LastResetTime";
 
@@ -40,7 +40,6 @@ public class MissionManager : MonoBehaviour
 
     void Start()
     {
-        // Suscribirse al contador de pasos
         if (StepCounter.Instance != null)
         {
             StepCounter.Instance.OnStepsUpdated += OnStepsUpdated;
@@ -54,7 +53,6 @@ public class MissionManager : MonoBehaviour
     {
         LoadMissions();
 
-        // Si no hay misiones o es un nuevo día, generar misiones
         if (allMissions.Count == 0 || ShouldResetMissions())
         {
             GenerateMissions();
@@ -63,21 +61,23 @@ public class MissionManager : MonoBehaviour
         CheckMissionExpiration();
     }
 
+    // ---------------------------------------------------------------
+    //      GENERACIÃ“N DE MISIONES ACTUALIZADA
+    // ---------------------------------------------------------------
     public void GenerateMissions()
     {
         allMissions.Clear();
 
-        // Misiones diarias (3 niveles de dificultad)
+        // 3 Misiones diarias
         for (int i = 0; i < 3; i++)
         {
             int stepsRequired = baseDailySteps + (i * dailyStepIncrement);
-            string description = $"Camina {stepsRequired} pasos hoy";
-            string reward = $"Recompensa diaria nivel {i + 1}";
+            int reward = 100 * (i + 1);  // Recompensas escaladas
 
             allMissions.Add(new Mission(
                 $"daily_{i}",
-                $"Misión Diaria {i + 1}",
-                description,
+                $"MisiÃ³n Diaria {i + 1}",
+                $"Camina {stepsRequired} pasos hoy",
                 stepsRequired,
                 reward,
                 MissionType.Daily,
@@ -89,18 +89,18 @@ public class MissionManager : MonoBehaviour
         allMissions.Add(new Mission(
             "long_1",
             "Explorador Inicial",
-            "Camina 5000 pasos en 3 días",
+            "Camina 5000 pasos en 3 dÃ­as",
             5000,
-            "Recompensa de Explorador",
+            300,
             MissionType.Long
         ));
 
         allMissions.Add(new Mission(
             "long_2",
             "Caminante Experto",
-            "Camina 10000 pasos en 3 días",
-            6000,
-            "Recompensa de Experto",
+            "Camina 10000 pasos en 3 dÃ­as",
+            10000,  // ðŸ”¥ CORREGIDO: era 700, deberÃ­a ser mayor
+            500,
             MissionType.Long
         ));
 
@@ -109,8 +109,8 @@ public class MissionManager : MonoBehaviour
             "weekly_1",
             "Maratoniano Semanal",
             "Camina 25000 pasos esta semana",
-            15000,
-            "Recompensa Semanal Especial",
+            25000,
+            1200,
             MissionType.Weekly
         ));
 
@@ -118,8 +118,8 @@ public class MissionManager : MonoBehaviour
             "weekly_2",
             "Aventurero Semanal",
             "Camina 15000 pasos esta semana",
-            10000,
-            "Recompensa Semanal",
+            15000,
+            800,
             MissionType.Weekly
         ));
 
@@ -153,7 +153,6 @@ public class MissionManager : MonoBehaviour
     public void CheckMissionExpiration()
     {
         bool needsRefresh = false;
-        var now = DateTime.Now;
 
         foreach (var mission in allMissions.ToList())
         {
@@ -161,7 +160,6 @@ public class MissionManager : MonoBehaviour
             {
                 if (mission.type == MissionType.Daily && mission.difficultyLevel < maxDailyResets)
                 {
-                    // Reiniciar misión diaria con mayor dificultad
                     int newStepsRequired = baseDailySteps + ((mission.difficultyLevel + 1) * dailyStepIncrement);
                     mission.currentSteps = 0;
                     mission.requiredSteps = newStepsRequired;
@@ -171,7 +169,6 @@ public class MissionManager : MonoBehaviour
                 }
                 else
                 {
-                    // Reemplazar misión expirada
                     allMissions.Remove(mission);
                     needsRefresh = true;
                 }
@@ -180,7 +177,6 @@ public class MissionManager : MonoBehaviour
 
         if (needsRefresh)
         {
-            // Asegurar que tenemos todas las misiones necesarias
             if (allMissions.Count(m => m.type == MissionType.Daily) < 3)
             {
                 GenerateMissions();
@@ -206,17 +202,32 @@ public class MissionManager : MonoBehaviour
         return true;
     }
 
+    // -------------------------------------------------------------------
+    //       CLAIM ACTUALIZADO - AHORA DA MONEDAS REALES
+    // -------------------------------------------------------------------
     public void ClaimMissionReward(Mission mission)
     {
-        if (mission != null && mission.isCompleted && !mission.isClaimed)
-        {
-            mission.ClaimReward();
-            SaveMissions();
-            RefreshMissionWindows();
+        if (mission == null) return;
+        if (!mission.isCompleted || mission.isClaimed) return;
 
-            // Mostrar mensaje de recompensa
-            Debug.Log($"¡Recompensa reclamada! {mission.rewardDescription}");
+        mission.isClaimed = true;
+
+        int moneyGained = mission.rewardAmount;
+
+        // ðŸ”¥ DAR MONEDAS AL JUGADOR
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.AddCoins(moneyGained);
+            Debug.Log($"ðŸ’° Recompensa de misiÃ³n: {moneyGained} monedas");
         }
+        else
+        {
+            Debug.LogWarning("CurrencyManager no encontrado para dar recompensa de misiÃ³n");
+        }
+
+        Oncompletemission?.Invoke();
+        SaveMissions();
+        RefreshMissionWindows();
     }
 
     public void RefreshMissionWindows()
@@ -265,7 +276,6 @@ public class MissionManager : MonoBehaviour
         }
     }
 
-    // Para testing
     public void AddTestSteps(int steps)
     {
         if (StepCounter.Instance != null)
@@ -278,7 +288,6 @@ public class MissionManager : MonoBehaviour
     {
         if (!pauseStatus)
         {
-            // Al reanudar la aplicación, verificar expiraciones
             CheckMissionExpiration();
             UpdateAllMissionProgress();
             RefreshMissionWindows();

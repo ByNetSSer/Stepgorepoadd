@@ -181,12 +181,19 @@ public class StepCounter : MonoBehaviour
     }
 
     // Método para simular pasos (para testing)
+    // Método para simular pasos (para testing)
     public void AddTestSteps(int steps)
     {
         totalSteps += steps;
         UpdateStepsUI();
         SavePersistentData();
+
+        Debug.Log($"[StepCounter] AddTestSteps called. Added {steps}. TotalSteps now {totalSteps}");
+
+        // NOTIFICAR a quien esté suscrito (MissionManager)
+        OnStepsUpdated?.Invoke(totalSteps);
     }
+
 
     // Método para resetear contador
     public void ResetSteps()

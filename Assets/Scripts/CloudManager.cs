@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-
+using UnityEngine.Events;
 public class CloudManager : MonoBehaviour
 {
     [Header("Configuración de Nubes")]
     public List<Cloud> clouds = new List<Cloud>();
     public float targetOffsetY = -1300f;
-
+    public UnityEvent OnTransitionFinishedWin;
     [Header("Duraciones")]
     public float upDuration = 0.8f;
     public float bounceDuration = 0.4f;
     public float downDuration = 1.0f;
     public float delayStep = 0.05f;
     public float holdTime = 1.5f;
+    private bool lastCombatResult;
 
     // Estado global
     public enum CloudState { Hidden, Visible, Animating }
@@ -82,7 +83,20 @@ public class CloudManager : MonoBehaviour
             state = CloudState.Visible;
         });
     }
+    public void PlayCombatTransition(bool result)
+    {
+        lastCombatResult = result; // Guardamos win / lose
 
+        // Usamos tu transición existente
+        PlayLoadingTransitionWithCallback(() =>
+        {
+            // 🔥 CUANDO TODA LA ANIMACIÓN ACABA --> imprimir resultado
+            if (lastCombatResult)
+                OnTransitionFinishedWin?.Invoke();
+
+            //Debug.Log("PERDISTE");
+        });
+    }
     public void StartHide(bool ignoreLock = false)
     {
         state = CloudState.Animating;
@@ -159,5 +173,48 @@ public class CloudManager : MonoBehaviour
     {
         foreach (var c in clouds) c.ResetInstant();
         state = CloudState.Visible;
+    }
+    public bool PlayLoadingTransitionWithCallback(System.Action onFinish)
+    {
+        if (isAnimating) return false;
+
+        state = CloudState.Animating;
+        float showMax = 0f;
+
+        var orderedShow = clouds.OrderBy(c => c.startPosition.y).ToList();
+
+        for (int i = 0; i < orderedShow.Count; i++)
+        {
+            Cloud c = orderedShow[i];
+            float delay = i * delayStep;
+            Tween t = c.MoveUpTween(upDuration, bounceDuration, delay);
+            float endTime = delay + upDuration + bounceDuration;
+            if (endTime > showMax) showMax = endTime;
+        }
+
+        // Después de mostrar → hold → ocultar
+        DOVirtual.DelayedCall(showMax + holdTime, () =>
+        {
+            float hideMax = 0f;
+            var orderedHide = clouds.OrderByDescending(c => c.startPosition.y).ToList();
+
+            for (int i = 0; i < orderedHide.Count; i++)
+            {
+                Cloud c = orderedHide[i];
+                float delay = i * delayStep;
+                Tween t = c.MoveDownTween(downDuration, delay);
+                float endTime = delay + downDuration;
+                if (endTime > hideMax) hideMax = endTime;
+            }
+
+            // Al finalizar todo → Hidden + callback
+            DOVirtual.DelayedCall(hideMax, () =>
+            {
+                state = CloudState.Hidden;
+                onFinish?.Invoke(); // <-- 🔥 AQUÍ IMPRIME GANASTE/PERDISTE
+            });
+        });
+
+        return true;
     }
 }

@@ -12,7 +12,7 @@ public class SceneButton : MonoBehaviour
     public bool useCloudTransition = true;
     public bool useInstantSwap = false;
 
-    private Button button;
+    public Button button;
 
     private void Awake()
     {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 [System.Serializable]
@@ -9,35 +9,41 @@ public class Mission
     public string description;
     public int requiredSteps;
     public int currentSteps;
-    public string rewardDescription;
+
+    // CAMBIO: ahora es un monto
+    public int rewardAmount;
+
     public bool isCompleted;
     public bool isClaimed;
     public MissionType type;
-    public int difficultyLevel; // Para misiones diarias que escalan
+    public int difficultyLevel;
     public DateTime startTime;
     public DateTime endTime;
 
-    public Mission(string id, string title, string description, int requiredSteps, string rewardDescription, MissionType type, int difficultyLevel = 0)
+    public Mission(string id, string title, string description, int requiredSteps, int rewardAmount, MissionType type, int difficultyLevel = 0)
     {
         this.id = id;
         this.title = title;
         this.description = description;
         this.requiredSteps = requiredSteps;
-        this.rewardDescription = rewardDescription;
+
+        // CAMBIO
+        this.rewardAmount = rewardAmount;
+
         this.type = type;
         this.difficultyLevel = difficultyLevel;
+
         currentSteps = 0;
         isCompleted = false;
         isClaimed = false;
 
-        // Establecer tiempos según el tipo de misión
         SetTimeBounds();
     }
 
     public void SetTimeBounds()
     {
         var now = DateTime.Now;
-        startTime = now.Date; // Inicio del día actual
+        startTime = now.Date;
 
         switch (type)
         {
@@ -74,8 +80,7 @@ public class Mission
         if (isCompleted && !isClaimed)
         {
             isClaimed = true;
-            Debug.Log($"Recompensa reclamada: {rewardDescription}");
-
+            Debug.Log($"Ganaste: {rewardAmount} monedas ðŸ’°");
         }
     }
 }

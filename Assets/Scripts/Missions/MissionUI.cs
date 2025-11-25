@@ -28,30 +28,32 @@ public class MissionUI : MonoBehaviour
     {
         if (currentMission == null) return;
 
+        // Información básica
         titleText.text = currentMission.title;
         descriptionText.text = currentMission.description;
-        rewardText.text = $"Recompensa: {currentMission.rewardDescription}";
+        rewardText.text = $"Recompensa: {currentMission.rewardAmount}";
 
-        // Actualizar progreso
+        // Progreso
         progressText.text = $"{currentMission.currentSteps}/{currentMission.requiredSteps}";
         progressSlider.value = currentMission.GetProgressPercentage();
 
-        // Configurar botón de reclamar
+        // Botón de reclamar
         claimButton.interactable = currentMission.isCompleted && !currentMission.isClaimed;
-        claimButton.gameObject.SetActive(!currentMission.isClaimed);
 
-        if (currentMission.isClaimed)
+        // Mostrar tiempo restante
+        TimeSpan remaining = currentMission.endTime - DateTime.Now;
+
+        if (remaining.TotalSeconds > 0)
         {
-            claimButton.GetComponentInChildren<TextMeshProUGUI>().text = "Reclamado";
-            claimButton.interactable = false;
+            if (remaining.TotalHours >= 1)
+                timeRemainingText.text = $"{Mathf.FloorToInt((float)remaining.TotalHours)}h {remaining.Minutes}m restantes";
+            else
+                timeRemainingText.text = $"{remaining.Minutes}m {remaining.Seconds}s restantes";
         }
         else
         {
-            claimButton.GetComponentInChildren<TextMeshProUGUI>().text = "Reclamar";
+            timeRemainingText.text = "Expirada";
         }
-
-        // Actualizar tiempo restante
-        UpdateTimeRemaining();
     }
 
     void UpdateTimeRemaining()
@@ -80,11 +82,10 @@ public class MissionUI : MonoBehaviour
 
     void OnClaimButtonClicked()
     {
-        if (currentMission != null && currentMission.isCompleted && !currentMission.isClaimed)
-        {
-            MissionManager.Instance.ClaimMissionReward(currentMission);
-            UpdateUI();
-        }
+        if (currentMission == null) return;
+
+        MissionManager.Instance.ClaimMissionReward(currentMission);
+        UpdateUI();
     }
 
     void Update()
